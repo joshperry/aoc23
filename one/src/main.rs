@@ -48,19 +48,25 @@ mod tests {
     }
 
     #[test]
-    fn extracts_13_value() {
+    fn extracts_multi_13_value() {
         let value = extract_value(&String::from("abc1efg2hij3klm"));
         assert_eq!(value, 13);
     }
 
     #[test]
-    fn extracts_15_value() {
+    fn extracts_multi_15_value() {
         let value = extract_value(&String::from("abc1efg3hij5klm"));
         assert_eq!(value, 15);
     }
 
     #[test]
     fn extracts_double_value() {
+        let value = extract_value(&String::from("abc1ef3g"));
+        assert_eq!(value, 13);
+    }
+
+    #[test]
+    fn extracts_single_value() {
         let value = extract_value(&String::from("abc1efg"));
         assert_eq!(value, 11);
     }
