@@ -1,13 +1,5 @@
-use std::fs::read_to_string;
+use aoclib::read_lines;
 use std::collections::HashMap;
-
-fn read_lines(file: &str) -> Vec<String> {
-    read_to_string(file)
-        .unwrap()
-        .lines()
-        .map(String::from)
-        .collect()
-}
 
 fn extract_digits(line: &String) -> Vec<(usize, &str)> {
     line
