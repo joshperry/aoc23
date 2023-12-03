@@ -1,13 +1,21 @@
-use aoclib::read_lines;
+use std::fs::read_to_string;
+use std::str::Lines;
 use std::collections::HashMap;
 
-fn extract_digits(line: &String) -> Vec<(usize, &str)> {
+fn extract_digits(line: &str) -> Vec<(usize, &str)> {
     line
         .match_indices(|c: char| c.is_digit(10))
         .collect()
 }
 
-fn extract_spells(line: &String) -> Vec<(usize, &str)> {
+fn extract_digit_values(lines: &mut Lines<'_>) -> Vec<i32> {
+    lines
+        .map(extract_digits)
+        .map(extract_posvalue)
+        .collect()
+}
+
+fn extract_spells(line: &str) -> Vec<(usize, &str)> {
     let spells = HashMap::from([
         ("one", "1"),
         ("two", "2"),
@@ -40,45 +48,37 @@ fn extract_posvalue(chars: Vec<(usize, &str)>) -> i32 {
         .map(|c| c.1)
         .collect::<Vec<&str>>();
     let value = match digits[..] {
-        [] => String::from("0"),
+        [] => "0".to_string(),
         [first] => format!("{first}{first}"),
         [first, .., last] => format!("{first}{last}"),
     };
     value.parse::<i32>().unwrap()
 }
 
-fn extract_digit_values(lines: &Vec<String>) -> Vec<i32> {
-    lines
-        .iter()
-        .map(extract_digits)
-        .map(extract_posvalue)
-        .collect()
-}
-
-fn extract_mixed(line: &String) -> Vec<(usize, &str)> {
+fn extract_mixed(line: &str) -> Vec<(usize, &str)> {
     let mut digits = extract_spells(&line);
     digits.extend(extract_digits(&line));
     digits
 }
 
-fn extract_mixed_values(lines: &Vec<String>) -> Vec<i32> {
+fn extract_mixed_values(lines: &mut Lines<'_>) -> Vec<i32> {
     lines
-        .iter()
         .map(extract_mixed)
         .map(extract_posvalue)
         .collect()
 }
 
 fn main() {
-    let lines = read_lines("one/input");
+    let file = read_to_string("one/input").unwrap();
+    let lines = file.lines();
 
-    let values = extract_digit_values(&lines);
+    let values = extract_digit_values(&mut lines.clone());
     let sum:i32 = values
         .into_iter()
         .sum();
     println!("calibration time, come on: {sum}");
 
-    let values = extract_mixed_values(&lines);
+    let values = extract_mixed_values(&mut lines.clone());
     let sum:i32 = values
         .into_iter()
         .sum();
@@ -89,85 +89,86 @@ fn main() {
 mod tests {
     use super::*;
 
-    fn extract_digit_value(line: &String) -> i32 {
-        let digits = extract_digits(&line);
+    fn extract_digit_value(line: &str) -> i32 {
+        let digits = extract_digits(line);
         extract_posvalue(digits)
     }
 
-    fn extract_spell_value(line: &String) -> i32 {
-        let digits = extract_spells(&line);
+    fn extract_spell_value(line: &str) -> i32 {
+        let digits = extract_spells(line);
         extract_posvalue(digits)
     }
 
-    fn extract_mixed_value(line: &String) -> i32 {
-        let mut digits = extract_spells(&line);
-        digits.extend(extract_digits(&line));
+    fn extract_mixed_value(line: &str) -> i32 {
+        let mut digits = extract_spells(line);
+        digits.extend(extract_digits(line));
         extract_posvalue(digits)
     }
 
     #[test]
     fn reads_lines() {
-        let lines = read_lines("input");
+        let file = read_to_string("input").unwrap();
+        let lines: Vec<&str> = file.lines().collect();
         assert_eq!(lines.len(), 1000);
     }
 
     #[test]
     fn extracts_multi_13_value() {
-        let value = extract_digit_value(&String::from("abc1efg2hij3klm"));
+        let value = extract_digit_value("abc1efg2hij3klm");
         assert_eq!(value, 13);
     }
 
     #[test]
     fn extracts_multi_15_value() {
-        let value = extract_digit_value(&String::from("abc1efg3hij5klm"));
+        let value = extract_digit_value("abc1efg3hij5klm");
         assert_eq!(value, 15);
     }
 
     #[test]
     fn extracts_double_value() {
-        let value = extract_digit_value(&String::from("abc1ef3g"));
+        let value = extract_digit_value("abc1ef3g");
         assert_eq!(value, 13);
     }
 
     #[test]
     fn extracts_single_value() {
-        let value = extract_digit_value(&String::from("abc1efg"));
+        let value = extract_digit_value("abc1efg");
         assert_eq!(value, 11);
     }
 
     #[test]
     fn extracts_no_value() {
-        let value = extract_digit_value(&String::from("abcefg"));
+        let value = extract_digit_value("abcefg");
         assert_eq!(value, 0);
     }
 
     #[test]
     fn extracts_single_spell_value() {
-        let value = extract_spell_value(&String::from("abonecde"));
+        let value = extract_spell_value("abonecde");
         assert_eq!(value, 11);
     }
 
     #[test]
     fn extracts_multi_spell_value() {
-        let value = extract_spell_value(&String::from("abonecdetwofgh"));
+        let value = extract_spell_value("abonecdetwofgh");
         assert_eq!(value, 12);
     }
 
     #[test]
     fn extracts_overlap_spell_value() {
-        let value = extract_spell_value(&String::from("aboneightfgh"));
+        let value = extract_spell_value("aboneightfgh");
         assert_eq!(value, 18);
     }
 
     #[test]
     fn extracts_unordered_overlap_spell_value() {
-        let value = extract_spell_value(&String::from("abtwoneightfgh"));
+        let value = extract_spell_value("abtwoneightfgh");
         assert_eq!(value, 28);
     }
 
     #[test]
     fn extracts_mixed_value() {
-        let value = extract_mixed_value(&String::from("ab1cdetwofgh"));
+        let value = extract_mixed_value("ab1cdetwofgh");
         assert_eq!(value, 12);
     }
 }
