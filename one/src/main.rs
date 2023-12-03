@@ -1,25 +1,25 @@
 use std::fs::read_to_string;
-use std::collections::HashMap;
+use phf::phf_map;
+
+static SPELLS: phf::Map<&'static str, &'static str> = phf_map! {
+    "one" => "1",
+    "two" => "2",
+    "three" => "3",
+    "four" => "4",
+    "five" => "5",
+    "six" => "6",
+    "seven" => "7",
+    "eight" => "8",
+    "nine" => "9",
+};
 
 fn extract_spells(line: &str) -> Vec<(usize, &str)> {
-    let spells = HashMap::from([
-        ("one", "1"),
-        ("two", "2"),
-        ("three", "3"),
-        ("four", "4"),
-        ("five", "5"),
-        ("six", "6"),
-        ("seven", "7"),
-        ("eight", "8"),
-        ("nine", "9"),
-    ]);
-
-    spells
-        .iter()
+    SPELLS
+        .keys()
         .map(|spell|
             line
-                .match_indices(spell.0)
-                .map(|m| (m.0, *spells.get(m.1).unwrap()))
+                .match_indices(spell)
+                .map(|m| (m.0, *SPELLS.get(m.1).unwrap()))
         )
         .flatten()
         .collect()
