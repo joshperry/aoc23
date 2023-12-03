@@ -1,4 +1,5 @@
 use std::fs::read_to_string;
+use std::collections::BTreeMap;
 use phf::phf_map;
 
 static SPELLS: phf::Map<&'static str, &'static str> = phf_map! {
@@ -13,7 +14,7 @@ static SPELLS: phf::Map<&'static str, &'static str> = phf_map! {
     "nine" => "9",
 };
 
-fn extract_spells(line: &str) -> Vec<(usize, &str)> {
+fn extract_spells(line: &str) -> BTreeMap<usize, &str> {
     SPELLS
         .keys()
         .map(|spell|
@@ -25,15 +26,8 @@ fn extract_spells(line: &str) -> Vec<(usize, &str)> {
         .collect()
 }
 
-fn calc_posvalue(matches: Vec<(usize, &str)>) -> i32 {
-    let mut schars = matches.clone();
-    schars
-        .sort_by(|a, b| a.0.cmp(&b.0));
-    let digits = schars
-        .iter()
-        .map(|c| c.1)
-        .collect::<Vec<&str>>();
-    let value = match digits[..] {
+fn calc_posvalue(matches: BTreeMap<usize, &str>) -> i32 {
+    let value = match matches.values().collect::<Vec<_>>()[..] {
         [] => "0".to_string(),
         [first] => format!("{first}{first}"),
         [first, .., last] => format!("{first}{last}"),
