@@ -27,11 +27,14 @@ fn extract_spells(line: &str) -> BTreeMap<usize, &str> {
 }
 
 fn calc_posvalue(matches: BTreeMap<usize, &str>) -> i32 {
-    let value = match matches.values().collect::<Vec<_>>()[..] {
-        [] => "0".to_string(),
-        [first] => format!("{first}{first}"),
-        [first, .., last] => format!("{first}{last}"),
+    let first = matches.first_key_value();
+    let last = matches.last_key_value();
+
+    let value = match (first, last) {
+        (Some(first), Some(last)) => format!("{0}{1}", first.1, last.1),
+        _ => "0".to_string(),
     };
+
     value.parse::<i32>().unwrap()
 }
 
