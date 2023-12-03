@@ -1,19 +1,5 @@
 use std::fs::read_to_string;
-use std::str::Lines;
 use std::collections::HashMap;
-
-fn extract_digits(line: &str) -> Vec<(usize, &str)> {
-    line
-        .match_indices(|c: char| c.is_digit(10))
-        .collect()
-}
-
-fn extract_digit_values(lines: &mut Lines<'_>) -> Vec<i32> {
-    lines
-        .map(extract_digits)
-        .map(extract_posvalue)
-        .collect()
-}
 
 fn extract_spells(line: &str) -> Vec<(usize, &str)> {
     let spells = HashMap::from([
@@ -39,8 +25,8 @@ fn extract_spells(line: &str) -> Vec<(usize, &str)> {
         .collect()
 }
 
-fn extract_posvalue(chars: Vec<(usize, &str)>) -> i32 {
-    let mut schars = chars.clone();
+fn calc_posvalue(matches: Vec<(usize, &str)>) -> i32 {
+    let mut schars = matches.clone();
     schars
         .sort_by(|a, b| a.0.cmp(&b.0));
     let digits = schars
@@ -55,32 +41,30 @@ fn extract_posvalue(chars: Vec<(usize, &str)>) -> i32 {
     value.parse::<i32>().unwrap()
 }
 
-fn extract_mixed(line: &str) -> Vec<(usize, &str)> {
-    let mut digits = extract_spells(&line);
-    digits.extend(extract_digits(&line));
-    digits
-}
-
-fn extract_mixed_values(lines: &mut Lines<'_>) -> Vec<i32> {
-    lines
-        .map(extract_mixed)
-        .map(extract_posvalue)
-        .collect()
-}
-
 fn main() {
     let file = read_to_string("one/input").unwrap();
     let lines = file.lines();
 
-    let values = extract_digit_values(&mut lines.clone());
-    let sum:i32 = values
-        .into_iter()
+    let sum:i32 = lines
+        .clone()
+        .map(|line|
+            line
+                .match_indices(|c: char|  c.is_digit(10))
+                .collect()
+        )
+        .map(calc_posvalue)
         .sum();
     println!("calibration time, come on: {sum}");
 
-    let values = extract_mixed_values(&mut lines.clone());
-    let sum:i32 = values
-        .into_iter()
+    let sum:i32 = lines
+        .clone()
+        .map(|line|
+            line
+                .match_indices(|c: char|  c.is_digit(10))
+                .chain(extract_spells(line))
+                .collect()
+        )
+        .map(calc_posvalue)
         .sum();
     println!("calibration time, again: {sum}");
 }
@@ -90,19 +74,23 @@ mod tests {
     use super::*;
 
     fn extract_digit_value(line: &str) -> i32 {
-        let digits = extract_digits(line);
-        extract_posvalue(digits)
+        let digits = line
+            .match_indices(|c: char|  c.is_digit(10))
+            .collect();
+        calc_posvalue(digits)
     }
 
     fn extract_spell_value(line: &str) -> i32 {
         let digits = extract_spells(line);
-        extract_posvalue(digits)
+        calc_posvalue(digits)
     }
 
     fn extract_mixed_value(line: &str) -> i32 {
-        let mut digits = extract_spells(line);
-        digits.extend(extract_digits(line));
-        extract_posvalue(digits)
+        let digits = line
+            .match_indices(|c: char|  c.is_digit(10))
+            .chain(extract_spells(line))
+            .collect();
+        calc_posvalue(digits)
     }
 
     #[test]
