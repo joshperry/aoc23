@@ -34,12 +34,21 @@ fn main() {
         .clone() // just the iterator
         .map(|line|
             line
-                // Find all digit characters in the line
-                .match_indices(|c: char|  c.is_digit(10))
-                .collect() // into BtreeMap for positional sort
+                // Collect all digit chars into a vector
+                .chars()
+                .filter(|c| c.is_digit(10))
+                .collect::<Vec<char>>()
         )
-        // Get the calibration value for the lien
-        .map(calc_posvalue)
+        // Get the calibration value for the line
+        .map(|digits|
+            match digits[..] {
+                [] => 0.to_string(),
+                [first] => format!("{first}{first}"),
+                [first, .., last] => format!("{first}{last}"),
+            }
+            .parse::<i32>()
+            .unwrap() // Safe as non-digits filtered
+        )
         // Sum all the values
         .sum();
     println!("calibration time, come on: {sum}");
