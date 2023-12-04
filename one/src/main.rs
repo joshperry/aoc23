@@ -43,11 +43,11 @@ fn main() {
     let lines = file.lines();
 
     let sum:i32 = lines
-        .clone()
+        .clone() // just the iterator
         .map(|line|
             line
                 .match_indices(|c: char|  c.is_digit(10))
-                .collect()
+                .collect() // into BtreeMap for positional sort
         )
         .map(calc_posvalue)
         .sum();
@@ -95,6 +95,26 @@ mod tests {
         let file = read_to_string("input").unwrap();
         let lines: Vec<&str> = file.lines().collect();
         assert_eq!(lines.len(), 1000);
+    }
+
+    #[test]
+    fn calculates_digit_value() {
+        let file = read_to_string("input").unwrap();
+        let lines = file.lines();
+        let value:i32 = lines
+            .map(extract_digit_value)
+            .sum();
+        assert_eq!(value, 54304);
+    }
+
+    #[test]
+    fn calculates_mixed_value() {
+        let file = read_to_string("input").unwrap();
+        let lines = file.lines();
+        let value:i32 = lines
+            .map(extract_mixed_value)
+            .sum();
+        assert_eq!(value, 54418);
     }
 
     #[test]
