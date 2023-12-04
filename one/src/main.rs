@@ -14,18 +14,6 @@ static SPELLS: phf::Map<&'static str, &'static str> = phf_map! {
     "nine" => "9",
 };
 
-fn extract_spells(line: &str) -> BTreeMap<usize, &str> {
-    SPELLS
-        .keys()
-        .map(|spell|
-            line
-                .match_indices(spell)
-                .map(|m| (m.0, *SPELLS.get(m.1).unwrap()))
-        )
-        .flatten()
-        .collect()
-}
-
 fn calc_posvalue(matches: BTreeMap<usize, &str>) -> i32 {
     let first = matches.first_key_value();
     let last = matches.last_key_value();
@@ -58,7 +46,16 @@ fn main() {
         .map(|line|
             line
                 .match_indices(|c: char|  c.is_digit(10))
-                .chain(extract_spells(line))
+                .chain(
+                    SPELLS
+                        .keys()
+                        .map(|spell|
+                            line
+                                .match_indices(spell)
+                                .map(|m| (m.0, *SPELLS.get(m.1).unwrap()))
+                        )
+                        .flatten()
+                )
                 .collect()
         )
         .map(calc_posvalue)
@@ -75,6 +72,18 @@ mod tests {
             .match_indices(|c: char|  c.is_digit(10))
             .collect();
         calc_posvalue(digits)
+    }
+
+    fn extract_spells(line: &str) -> BTreeMap<usize, &str> {
+        SPELLS
+            .keys()
+            .map(|spell|
+                line
+                    .match_indices(spell)
+                    .map(|m| (m.0, *SPELLS.get(m.1).unwrap()))
+            )
+            .flatten()
+            .collect()
     }
 
     fn extract_spell_value(line: &str) -> i32 {
