@@ -15,12 +15,12 @@ static SPELLS: phf::Map<&'static str, &'static str> = phf_map! {
 };
 
 fn calc_posvalue(matches: BTreeMap<usize, &str>) -> i32 {
-    let first = matches.first_key_value();
-    let last = matches.last_key_value();
+    let first = matches.first_key_value().and_then(|x| Some(x.1));
+    let last = matches.last_key_value().and_then(|x| Some(x.1));
 
     let value = match (first, last) {
-        (Some(first), Some(last)) => format!("{0}{1}", first.1, last.1),
-        _ => "0".to_string(),
+        (Some(first), Some(last)) => format!("{first}{last}"),
+        _ => 0.to_string(),
     };
 
     value.parse::<i32>().unwrap()
@@ -34,10 +34,13 @@ fn main() {
         .clone() // just the iterator
         .map(|line|
             line
+                // Find all digit characters in the line
                 .match_indices(|c: char|  c.is_digit(10))
                 .collect() // into BtreeMap for positional sort
         )
+        // Get the calibration value for the lien
         .map(calc_posvalue)
+        // Sum all the values
         .sum();
     println!("calibration time, come on: {sum}");
 
@@ -48,13 +51,16 @@ fn main() {
                 .match_indices(|c: char|  c.is_digit(10))
                 .chain(
                     SPELLS
-                        .keys()
+                        .keys() 
+                        // For every spelled number
                         .map(|spell|
                             line
-                                .match_indices(spell)
-                                .map(|m| (m.0, *SPELLS.get(m.1).unwrap()))
+                                // Find all (position, spell) instances in the line
+                                .match_indices(spell) 
+                                // map to (position, digit)
+                                .map(|m| (m.0, *SPELLS.get(m.1).unwrap())) 
                         )
-                        .flatten()
+                        .flatten() // flatten the list of match lists
                 )
                 .collect()
         )
