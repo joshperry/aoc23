@@ -27,11 +27,10 @@ fn calc_posvalue(matches: BTreeMap<usize, &str>) -> i32 {
 }
 
 fn main() {
-    let file = read_to_string("one/input").unwrap();
-    let lines = file.lines();
+    let file = read_to_string("one/input")
+        .expect("could not read input file");
 
-    let sum:i32 = lines
-        .clone() // just the iterator
+    let sum:i32 = file.lines()
         .map(|line|
             line
                 // Collect all digit chars into a vector
@@ -53,8 +52,7 @@ fn main() {
         .sum();
     println!("calibration time, come on: {sum}");
 
-    let sum:i32 = lines
-        .clone()
+    let sum:i32 = file.lines()
         .map(|line|
             line
                 .match_indices(|c: char|  c.is_digit(10))
@@ -62,14 +60,13 @@ fn main() {
                     SPELLS
                         .keys() 
                         // For every spelled number
-                        .map(|spell|
+                        .flat_map(|spell|
                             line
                                 // Find all (position, spell) instances in the line
                                 .match_indices(spell) 
                                 // map to (position, digit)
                                 .map(|m| (m.0, *SPELLS.get(m.1).unwrap())) 
                         )
-                        .flatten() // flatten the list of match lists
                 )
                 .collect()
         )
