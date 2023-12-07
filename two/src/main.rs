@@ -41,6 +41,35 @@ fn main() {
         .sum();
 
     println!("The possibilities are endless, well kinda: {}", possiblesum);
+
+    let power: isize = file.lines()
+        // Parse out the game and trials
+        .map(|l|
+            trialre
+                .find_iter(l)
+                // Parse the number and color of each
+                .map(|t|
+                    match t.as_str().split(' ').collect::<Vec<_>>()[..] {
+                        [count, color] => (count.parse::<isize>().unwrap(), color),
+                        _ => (0, "none"),
+                    }
+                )
+                // Fold into a tuple holding the largest count of each color
+                .fold((0, 0, 0), |acc, t|
+                    match t {
+                        (n, "red") => if n > acc.0 { (n, acc.1, acc.2) } else { acc },
+                        (n, "green") => if n > acc.1 { (acc.0, n, acc.2) } else { acc },
+                        (n, "blue") => if n > acc.2 { (acc.0, acc.1, n) } else { acc },
+                        _ => acc,
+                    }
+                )
+        )
+        // Product of largest counts of each color per game
+        .map(|acc| acc.0 * acc.1 * acc.2)
+        // Sum of products
+        .sum();
+
+    println!("This isn't even my final form: {}", power);
 }
 
 #[cfg(test)]
