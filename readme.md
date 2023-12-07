@@ -20,7 +20,7 @@ To run all the tests, just leave off the `-p` parameter.
 To run the solution for a certain day (e.g. `one`):
 
 ```
-cargo run one
+cargo run -p one
 ```
 
 NB: When running tests (`cargo test`), the cwd is the workspace dir, but when
