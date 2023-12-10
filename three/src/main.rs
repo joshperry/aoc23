@@ -31,7 +31,7 @@ fn main() {
                 // one char after
                 if m.1 < bblob.len() { bblob.get(m.1..m.1 + 1) } else { None },
                 // following line's span sized -1 & +1
-                if m.1 <= bblob.len() + 141 { bblob.get(m.0 + 139..m.1 + 141) } else { None },
+                if m.1 <= bblob.len() - 141 { bblob.get(m.0 + 139..m.1 + 141) } else { None },
             ]
                 .into_iter()
                 // Unwrap `get`, with default to period (so it gets filtered)
